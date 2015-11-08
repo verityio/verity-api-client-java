@@ -16,15 +16,15 @@ import java.io.File;
 import java.util.Map;
 import java.util.HashMap;
 
-@javax.annotation.Generated(value = "class io.swagger.codegen.languages.JavaClientCodegen", date = "2015-10-08T12:39:32.615+02:00")
-public class SignApi {
+@javax.annotation.Generated(value = "class io.swagger.codegen.languages.JavaClientCodegen", date = "2015-11-09T00:00:32.346+02:00")
+public class SigningApi {
   private ApiClient apiClient;
 
-  public SignApi() {
+  public SigningApi() {
     this(Configuration.getDefaultApiClient());
   }
 
-  public SignApi(ApiClient apiClient) {
+  public SigningApi(ApiClient apiClient) {
     this.apiClient = apiClient;
   }
 

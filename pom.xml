@@ -5,7 +5,7 @@
   <artifactId>api.client</artifactId>
   <packaging>jar</packaging>
   <name>api.client</name>
-  <version>1.0.1</version>
+  <version>1.0.2</version>
   <scm>
     <connection>scm:git:git@github.com:swagger-api/swagger-mustache.git</connection>
     <developerConnection>scm:git:git@github.com:swagger-api/swagger-codegen.git</developerConnection>
@@ -15,14 +15,13 @@
     <maven>2.2.0</maven>
   </prerequisites>
 
-<distributionManagement>
-    <repository>
-        <id>dev.centio.co</id>
-        <name>dev.centio.co-releases</name>
-        <url>http://artifactory.centio.co/libs-release-local</url>
-    </repository>
-</distributionManagement>
-
+    <distributionManagement>
+        <repository>
+            <id>dev.centio.co</id>
+            <name>dev.centio.co-releases</name>
+            <url>http://artifactory.centio.co/libs-release-local</url>
+        </repository>
+    </distributionManagement>
 
   <build>
     <plugins>
@@ -160,6 +159,11 @@
       <artifactId>joda-time</artifactId>
       <version>${jodatime-version}</version>
     </dependency>
+      <dependency>
+          <groupId>org.bouncycastle</groupId>
+          <artifactId>bcprov-jdk15on</artifactId>
+          <version>1.53</version>
+      </dependency>
 
     <!-- test dependencies -->
     <dependency>
@@ -168,6 +172,7 @@
       <version>${junit-version}</version>
       <scope>test</scope>
     </dependency>
+
   </dependencies>
   <properties>
     <swagger-annotations-version>1.5.0</swagger-annotations-version>

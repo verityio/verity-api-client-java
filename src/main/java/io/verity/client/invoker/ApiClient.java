@@ -13,6 +13,7 @@ import com.sun.jersey.multipart.file.FileDataBodyPart;
 import javax.ws.rs.core.Response.Status.Family;
 import javax.ws.rs.core.MediaType;
 
+import java.security.PrivateKey;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -35,16 +36,14 @@ import java.text.SimpleDateFormat;
 import java.text.ParseException;
 
 import io.verity.client.invoker.auth.Authentication;
-import io.verity.client.invoker.auth.HttpBasicAuth;
 import io.verity.client.invoker.auth.ApiKeyAuth;
-import io.verity.client.invoker.auth.OAuth;
 
-@javax.annotation.Generated(value = "class io.swagger.codegen.languages.JavaClientCodegen", date = "2015-10-08T12:39:32.615+02:00")
+@javax.annotation.Generated(value = "class io.swagger.codegen.languages.JavaClientCodegen", date = "2015-11-09T00:00:32.346+02:00")
 public class ApiClient {
   private Map<String, Client> hostMap = new HashMap<String, Client>();
   private Map<String, String> defaultHeaderMap = new HashMap<String, String>();
   private boolean debugging = false;
-  private String basePath = "https://app.verity.io/";
+  private String basePath = "http://localhost:8080/Verity";
   private JSON json = new JSON();
 
   private Map<String, Authentication> authentications;
@@ -113,43 +112,28 @@ public class ApiClient {
   }
 
   /**
-   * Helper method to set username for the first HTTP basic authentication.
-   */
-  public void setUsername(String username) {
-    for (Authentication auth : authentications.values()) {
-      if (auth instanceof HttpBasicAuth) {
-        ((HttpBasicAuth) auth).setUsername(username);
-        return;
-      }
-    }
-    throw new RuntimeException("No HTTP basic authentication configured!");
-  }
-
-  /**
-   * Helper method to set password for the first HTTP basic authentication.
-   */
-  public void setPassword(String password) {
-    for (Authentication auth : authentications.values()) {
-      if (auth instanceof HttpBasicAuth) {
-        ((HttpBasicAuth) auth).setPassword(password);
-        return;
-      }
-    }
-    throw new RuntimeException("No HTTP basic authentication configured!");
-  }
-
-  /**
    * Helper method to set API key value for the first API key authentication.
    */
   public void setApiKey(String apiKey) {
-    for (Authentication auth : authentications.values()) {
-      if (auth instanceof ApiKeyAuth) {
-        ((ApiKeyAuth) auth).setApiKey(apiKey);
-        return;
+      for (Authentication auth : authentications.values()) {
+          if (auth instanceof ApiKeyAuth) {
+              ((ApiKeyAuth) auth).setApiKey(apiKey);
+              return;
+          }
       }
-    }
-    throw new RuntimeException("No API key authentication configured!");
+      throw new RuntimeException("No API key authentication configured!");
   }
+
+  public void setPrivateKey(PrivateKey privateKey) {
+      for (Authentication auth : authentications.values()) {
+          if (auth instanceof ApiKeyAuth) {
+              ((ApiKeyAuth) auth).setPrivateKey(privateKey);
+              return;
+          }
+      }
+      throw new RuntimeException("No API key authentication configured!");
+  }
+
 
   /**
    * Helper method to set API key prefix for the first API key authentication.
@@ -418,6 +402,8 @@ public class ApiClient {
       }
     }
 
+
+
     String querystring = b.substring(0, b.length() - 1);
 
     Builder builder;
@@ -425,6 +411,15 @@ public class ApiClient {
       builder = client.resource(basePath + path + querystring).getRequestBuilder();
     else
       builder = client.resource(basePath + path + querystring).accept(accept);
+
+      String checksumUri = basePath + path + querystring;
+      checksumUri = checksumUri.substring(checksumUri.indexOf("://")+3);
+      checksumUri = checksumUri.substring(checksumUri.indexOf("/"));
+
+      String checksumAuth = headerParams.get("X-Authorization-Token");
+      String checksumBody = null;
+
+
 
     for (String key : headerParams.keySet()) {
       builder = builder.header(key, headerParams.get(key));
@@ -448,9 +443,13 @@ public class ApiClient {
         }
       }
       body = mp;
+      checksumBody = body.toString();
     } else if (contentType.startsWith("application/x-www-form-urlencoded")) {
       encodedFormParams = this.getXWWWFormUrlencodedParams(formParams);
+      checksumBody = encodedFormParams;
     }
+
+    signApiRequest(authNames, builder, checksumUri, checksumAuth, checksumBody);
 
     ClientResponse response = null;
 
@@ -609,6 +608,13 @@ public class ApiClient {
       auth.applyToParams(queryParams, headerParams);
     }
   }
+
+    private void signApiRequest(String[] authNames, Builder builder, String checksumUri, String checksumAuth, String checksumBody) {
+        for (String authName : authNames) {
+            Authentication auth = authentications.get(authName);
+            auth.sign(builder, checksumUri, checksumAuth, checksumBody);
+        }
+    }
 
   /**
    * Encode the given form parameters as request body.

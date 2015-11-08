@@ -3,11 +3,12 @@ package io.verity.client.invoker;
 import java.util.Map;
 import java.util.List;
 
-@javax.annotation.Generated(value = "class io.swagger.codegen.languages.JavaClientCodegen", date = "2015-10-08T12:39:32.615+02:00")
+@javax.annotation.Generated(value = "class io.swagger.codegen.languages.JavaClientCodegen", date = "2015-11-09T00:00:32.346+02:00")
 public class ApiException extends Exception {
   private int code = 0;
   private Map<String, List<String>> responseHeaders = null;
   private String responseBody = null;
+  private String message;
 
   public ApiException() {}
 
@@ -45,6 +46,9 @@ public class ApiException extends Exception {
 
   public ApiException(int code, String message, Map<String, List<String>> responseHeaders, String responseBody) {
     this(code, message);
+      if(responseHeaders.containsKey("X-Authorization-Information")) {
+          this.message = message+": "+responseHeaders.get("X-Authorization-Information").get(0);
+      }
     this.responseHeaders = responseHeaders;
     this.responseBody = responseBody;
   }
@@ -52,6 +56,10 @@ public class ApiException extends Exception {
   public int getCode() {
     return code;
   }
+
+    public String getMessage() {
+        return this.message;
+    }
 
   /**
    * Get the HTTP response headers.

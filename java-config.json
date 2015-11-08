@@ -1,0 +1,7 @@
+{
+	"invokerPackage":"io.verity.client.invoker",
+	"apiPackage":"io.verity.client.api",
+	"modelPackage":"io.verity.client.model",
+        "groupId":"io.verity",
+	"artifactId":"api.client"
+}
