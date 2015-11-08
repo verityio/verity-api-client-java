@@ -72,30 +72,32 @@ public class ApiKeyAuth implements Authentication {
     @Override
     public void sign(WebResource.Builder builder, String checksumUri, String checksumAuth, String checksumBody) {
         try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            md.update(checksumUri.getBytes());
-            md.update(checksumAuth.getBytes());
-            if(checksumBody != null) {
-                md.update(checksumBody.getBytes());
+            if(privateKey != null) {
+                MessageDigest md = MessageDigest.getInstance("SHA-256");
+                md.update(checksumUri.getBytes());
+                md.update(checksumAuth.getBytes());
+                if (checksumBody != null) {
+                    md.update(checksumBody.getBytes());
+                }
+
+                Signature signature = Signature.getInstance("SHA256withRSA");
+                signature.initSign(privateKey);
+
+                byte[] mdbytes = md.digest();
+
+                StringBuffer sb = new StringBuffer();
+                for (int i = 0; i < mdbytes.length; i++) {
+                    sb.append(Integer.toString((mdbytes[i] & 0xff) + 0x100, 16).substring(1));
+                }
+
+                String checksum = sb.toString();
+                signature.update(checksum.getBytes());
+
+                byte[] signed = signature.sign();
+                Base64.Encoder encoder = Base64.getEncoder();
+
+                builder.header("X-Request-Signature", encoder.encodeToString(signed));
             }
-
-            Signature signature = Signature.getInstance("SHA256withRSA");
-            signature.initSign(privateKey);
-
-            byte[] mdbytes = md.digest();
-
-            StringBuffer sb = new StringBuffer();
-            for (int i = 0; i < mdbytes.length; i++) {
-                sb.append(Integer.toString((mdbytes[i] & 0xff) + 0x100, 16).substring(1));
-            }
-
-            String checksum = sb.toString();
-            signature.update(checksum.getBytes());
-
-            byte[] signed = signature.sign();
-            Base64.Encoder encoder = Base64.getEncoder();
-
-            builder.header("X-Request-Signature", encoder.encodeToString(signed));
         } catch (Exception e) {
             e.printStackTrace();
         }
